@@ -29,15 +29,21 @@ app.get('/api/hello', function(req, res) {
 app.get('/api/shorturl/:url', (req, res) => {
   const shorturl = Number(req.params.url) - 1;
   const url = Object.keys(urls)[shorturl];
-  
+
   res.redirect(url);
 });
 
 app.post('/api/shorturl', (req, res) => {
-  const url = req.body.url
-  const lookupUrl = url.replace(/^https?:\/\//, "");
+  const url = req.body.url;
+  const urlRegex = /^https?:\/\//;
+  let hostname = "Invalid";
 
-  dns.lookup(lookupUrl, (err) => {
+  if (urlRegex.test(url)) {
+    const urlObj = new URL(url);
+    hostname = urlObj.hostname;
+  }
+
+  dns.lookup(hostname, (err) => {
     if (err) {
       res.json({ error: 'invalid url' });
     } else {
